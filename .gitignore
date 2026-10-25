@@ -1,0 +1,22 @@
+# Maven build output
+target/
+
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# Runtime data and logs created when the application runs
+data/
+eprms-data/
+eprms-server-data/
+*.log
+*.log.lck
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# H2 database files (extension E1)
+*.mv.db
+*.trace.db

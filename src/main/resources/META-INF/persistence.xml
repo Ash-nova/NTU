@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Extension E1. The domain classes are mapped in META-INF/orm.xml so they do not
+  carry JPA annotations. Repositories call Persistence.createEntityManagerFactory("eprms").
+-->
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+
+    <persistence-unit name="eprms" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <mapping-file>META-INF/orm.xml</mapping-file>
+        <class>uk.ac.ntu.eprms.domain.Project</class>
+        <class>uk.ac.ntu.eprms.domain.TeamMember</class>
+        <class>uk.ac.ntu.eprms.domain.Task</class>
+        <class>uk.ac.ntu.eprms.domain.FeatureTask</class>
+        <class>uk.ac.ntu.eprms.domain.BugTask</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:file:./eprms-db"/>
+            <property name="jakarta.persistence.jdbc.user" value="sa"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.show_sql" value="false"/>
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="eprms-test" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <mapping-file>META-INF/orm.xml</mapping-file>
+        <class>uk.ac.ntu.eprms.domain.Project</class>
+        <class>uk.ac.ntu.eprms.domain.TeamMember</class>
+        <class>uk.ac.ntu.eprms.domain.Task</class>
+        <class>uk.ac.ntu.eprms.domain.FeatureTask</class>
+        <class>uk.ac.ntu.eprms.domain.BugTask</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:mem:eprms-test;DB_CLOSE_DELAY=-1"/>
+            <property name="jakarta.persistence.jdbc.user" value="sa"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
+            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+            <property name="hibernate.show_sql" value="false"/>
+        </properties>
+    </persistence-unit>
+</persistence>

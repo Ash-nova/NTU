@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm_3_0.xsd"
+                 version="3.0">
+
+    <!-- Mapping lives here so the domain classes do not import JPA. -->
+
+    <entity class="uk.ac.ntu.eprms.domain.TeamMember" access="FIELD" metadata-complete="true">
+        <table name="TEAM_MEMBER"/>
+        <attributes>
+            <id name="id"/>
+            <basic name="name"/>
+            <basic name="email"/>
+            <basic name="role"/>
+        </attributes>
+    </entity>
+
+    <entity class="uk.ac.ntu.eprms.domain.Task" access="FIELD" metadata-complete="true">
+        <table name="TASK"/>
+        <inheritance strategy="SINGLE_TABLE"/>
+        <discriminator-column name="TASK_TYPE"/>
+        <attributes>
+            <id name="id"/>
+            <basic name="title"/>
+            <basic name="priority"/>
+            <basic name="dueDate"/>
+            <basic name="status">
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="assigneeId"/>
+            <element-collection name="dependsOn" target-class="java.util.UUID" fetch="EAGER">
+                <collection-table name="TASK_DEPENDENCY">
+                    <join-column name="TASK_ID"/>
+                </collection-table>
+                <column name="DEPENDS_ON"/>
+            </element-collection>
+        </attributes>
+    </entity>
+
+    <entity class="uk.ac.ntu.eprms.domain.FeatureTask" access="FIELD" metadata-complete="true">
+        <discriminator-value>FEATURE</discriminator-value>
+        <attributes>
+            <basic name="featureArea"/>
+        </attributes>
+    </entity>
+
+    <entity class="uk.ac.ntu.eprms.domain.BugTask" access="FIELD" metadata-complete="true">
+        <discriminator-value>BUG</discriminator-value>
+        <attributes>
+            <basic name="severity">
+                <enumerated>STRING</enumerated>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="uk.ac.ntu.eprms.domain.Project" access="FIELD" metadata-complete="true">
+        <table name="PROJECT"/>
+        <attributes>
+            <id name="id"/>
+            <basic name="name"/>
+            <basic name="description"/>
+            <one-to-many name="tasks" target-entity="uk.ac.ntu.eprms.domain.Task"
+                         orphan-removal="true" fetch="EAGER">
+                <join-column name="PROJECT_ID"/>
+                <order-column name="TASK_INDEX"/>
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+</entity-mappings>
