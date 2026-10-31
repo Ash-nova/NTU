@@ -130,6 +130,7 @@ public final class TaskDetailController {
         table.getColumns().add(column("Due", task -> task.getDueDate() == null ? "" : DATES.format(task.getDueDate())));
         table.getColumns().add(column("Status", task -> labelFor(task.getStatus())));
         table.getColumns().add(column("Assignee", this::assigneeName));
+        table.getColumns().add(column("Depends on", this::dependencySummary));
         table.setRowFactory(view -> new TableRow<>() {
             @Override
             protected void updateItem(Task task, boolean emptyRow) {
@@ -138,6 +139,11 @@ public final class TaskDetailController {
                 if (task != null && !emptyRow && task.isOverdue()) {
                     getStyleClass().add("overdue-row");
                 }
+            }
+        });
+        table.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && table.getSelectionModel().getSelectedItem() != null) {
+                editTask(table.getSelectionModel().getSelectedItem());
             }
         });
         table.setPlaceholder(new Label("No tasks match the current filters."));
@@ -265,6 +271,19 @@ public final class TaskDetailController {
     private String assigneeName(Task task) {
         TeamMember member = workspace.eprms.findMember(task.getAssigneeId());
         return member == null ? "Unassigned" : member.getName();
+    }
+
+    private String dependencySummary(Task task) {
+        Project project = current.get();
+        if (project == null || task.getDependsOn().isEmpty()) {
+            return "—";
+        }
+        List<String> titles = new java.util.ArrayList<>();
+        for (UUID id : task.getDependsOn()) {
+            Task other = project.findTask(id);
+            titles.add(other == null ? "?" : other.getTitle());
+        }
+        return String.join(", ", titles);
     }
 
     private static String labelFor(TaskStatus status) {

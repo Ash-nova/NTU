@@ -97,20 +97,49 @@ public final class NextTasksController {
         }
         int rank = 1;
         for (Task task : tasks) {
-            list.getItems().add(rank + ".  " + task.getTitle()
-                    + "   ·   " + projectName(task)
-                    + "   ·   due " + task.getDueDate()
-                    + "   ·   priority " + task.getPriority());
+            StringBuilder line = new StringBuilder();
+            line.append(rank).append(".  ").append(task.getTitle())
+                    .append("   ·   ").append(projectName(task))
+                    .append("   ·   due ").append(task.getDueDate())
+                    .append("   ·   priority ").append(task.getPriority());
+            String blockers = blockerSummary(task);
+            if (!blockers.isEmpty()) {
+                line.append("   ·   waiting on: ").append(blockers);
+            }
+            if (task.isOverdue()) {
+                line.append("   ·   OVERDUE");
+            }
+            list.getItems().add(line.toString());
             rank++;
         }
     }
 
     private String projectName(Task task) {
-        for (Project project : workspace.projects) {
-            if (project.findTask(task.getId()) != null) {
-                return project.getName();
+        Project project = findProject(task);
+        return project == null ? "Unknown project" : project.getName();
+    }
+
+    private String blockerSummary(Task task) {
+        Project project = findProject(task);
+        if (project == null || task.getDependsOn().isEmpty()) {
+            return "";
+        }
+        List<String> waiting = new ArrayList<>();
+        for (var id : task.getDependsOn()) {
+            Task other = project.findTask(id);
+            if (other != null && other.getStatus() != TaskStatus.DONE) {
+                waiting.add(other.getTitle());
             }
         }
-        return "Unknown project";
+        return String.join(", ", waiting);
+    }
+
+    private Project findProject(Task task) {
+        for (Project project : workspace.projects) {
+            if (project.findTask(task.getId()) != null) {
+                return project;
+            }
+        }
+        return null;
     }
 }
