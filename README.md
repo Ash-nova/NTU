@@ -1,61 +1,62 @@
 # EPRMS
 
-Enterprise Project and Resource Management System for SOFT40051. A project manager records projects, breaks them into feature and bug tasks, assigns those tasks to team members, and sees what needs attention. There is one user and no login.
+SOFT40051 coursework. This is a small desktop app for managing projects, feature/bug tasks, and team members. There is a single user and no login screen.
+
+Student: Ashwin Babu Iyer (N1494935)
+
+## Olympus repository
+
+https://olympus.ntu.ac.uk/N1494935/ASEPROJECT_N1494935
 
 ## Build and test
 
-From this folder:
+Needs JDK 17+ and Maven. From this folder:
 
 ```
 mvn clean test
 ```
 
-That needs JDK 17 or newer and Maven. The first run downloads the libraries.
-
-## Run the application
+## Run
 
 ```
 mvn javafx:run
 ```
 
-Always start `uk.ac.ntu.eprms.Launcher`. Running `App` directly misses the JavaFX runtime.
+Start through `uk.ac.ntu.eprms.Launcher`. Do not run `App` on its own or JavaFX will not load correctly.
 
-## Where data is stored
+## Data storage
 
-By default the app writes:
+Default mode is JSON files under `data/`:
 
 - `data/projects.json`
 - `data/members.json`
 
-Those files are created on the first save. A missing file, or a file that is not valid JSON, loads as an empty list and is logged. The application does not crash.
+If a file is missing or invalid, the app loads an empty list and logs the problem instead of crashing.
 
-To use the embedded H2 database instead (extension E1), edit `eprms.properties` in this folder:
+To use the embedded H2 database (extension E1), set this in `eprms.properties`:
 
 ```
 persistence=jpa
 ```
 
-Or start the JVM with `-Deprms.persistence=jpa`. The database file is `eprms-db.mv.db`. Switching mode does not require a change in the window or the service classes. `RepositoryFactory` is the only place that chooses the implementation.
+You can also pass `-Deprms.persistence=jpa`. The database file is `eprms-db.mv.db`. Switch back with `persistence=json`. The UI and services stay the same; `RepositoryFactory` picks the storage implementation.
 
-Set `persistence=json` to go back to files.
+Do not commit `target/`, `data/`, log files, or H2 database files. Those are already listed in `.gitignore`.
 
-## Olympus repository
+## Project layout
 
-Add the private Olympus URL here once the repository exists:
-
-```
-[ADD YOUR OLYMPUS REPOSITORY URL]
-```
-
-Commit regularly, with a message that says what changed and why. The brief asks for at least 20 commits spread over at least six different weeks. Do not commit `target/`, `data/`, log files, or the H2 database files. `.gitignore` already excludes them.
-
-## Layout
-
-| Folder | What belongs there |
+| Package | Contents |
 |---|---|
 | `domain` | Project, Task, FeatureTask, BugTask, TeamMember |
-| `service` | Search, filter, sort, statistics, prioritisation strategies, dependencies |
-| `persistence` | Repository interfaces, JSON implementations, JPA implementations |
+| `service` | Search, filter, sort, statistics, prioritisation, dependencies |
+| `persistence` | Repository interfaces, JSON storage, JPA storage |
 | `ui` | JavaFX screens |
 
-The window calls services. It does not read files itself. Load and save run on a background thread.
+The UI talks to services only. Load and save run on a background thread.
+
+## What is included
+
+Core C1–C8, plus extensions:
+
+- E4 — task dependencies with ordering and cycle checks
+- E1 — JPA/Hibernate + H2 behind the same repository interfaces
