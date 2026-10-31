@@ -15,11 +15,13 @@ public final class MainController {
     private final Workspace workspace;
     private final ProjectListController projects;
     private final TeamMemberController team;
+    private final SearchController search;
     private final StatisticsController statistics;
     private final NextTasksController nextTasks;
     private final BorderPane root = new BorderPane();
     private final Button projectsButton = navButton("Projects");
     private final Button teamButton = navButton("Team");
+    private final Button searchButton = navButton("Search");
     private final Button statisticsButton = navButton("Statistics");
     private final Button nextButton = navButton("Next tasks");
 
@@ -27,6 +29,7 @@ public final class MainController {
         this.workspace = workspace;
         this.projects = new ProjectListController(workspace);
         this.team = new TeamMemberController(workspace);
+        this.search = new SearchController(workspace);
         this.statistics = new StatisticsController(workspace);
         this.nextTasks = new NextTasksController(workspace);
         build();
@@ -48,10 +51,12 @@ public final class MainController {
 
         projectsButton.setOnAction(event -> show(projects.getRoot(), projectsButton, projects::refresh));
         teamButton.setOnAction(event -> show(team.getRoot(), teamButton, team::refresh));
+        searchButton.setOnAction(event -> show(search.getRoot(), searchButton, search::refresh));
         statisticsButton.setOnAction(event -> show(statistics.getRoot(), statisticsButton, statistics::refresh));
         nextButton.setOnAction(event -> show(nextTasks.getRoot(), nextButton, nextTasks::refresh));
 
-        VBox side = new VBox(8, brand, tag, projectsButton, teamButton, statisticsButton, nextButton);
+        VBox side = new VBox(8, brand, tag, projectsButton, teamButton, searchButton,
+                nextButton, statisticsButton);
         side.getStyleClass().add("sidebar");
         side.setPrefWidth(190);
 
@@ -67,7 +72,8 @@ public final class MainController {
     }
 
     private void show(Parent view, Button selected, Runnable refresh) {
-        for (Button button : new Button[] {projectsButton, teamButton, statisticsButton, nextButton}) {
+        for (Button button : new Button[] {
+                projectsButton, teamButton, searchButton, statisticsButton, nextButton}) {
             button.getStyleClass().remove("nav-selected");
         }
         if (!selected.getStyleClass().contains("nav-selected")) {
@@ -83,6 +89,8 @@ public final class MainController {
             projects.refresh();
         } else if (center == team.getRoot()) {
             team.refresh();
+        } else if (center == search.getRoot()) {
+            search.refresh();
         } else if (center == statistics.getRoot()) {
             statistics.refresh();
         } else if (center == nextTasks.getRoot()) {
