@@ -35,6 +35,8 @@ import uk.ac.ntu.eprms.service.CircularDependencyException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,6 +57,7 @@ public final class TaskDetailController {
     private final ComboBox<String> priorityFilter = new ComboBox<>();
     private final ComboBox<String> memberFilter = new ComboBox<>();
     private final ComboBox<String> sortChoice = new ComboBox<>();
+    private final ComboBox<String> sortOrder = new ComboBox<>();
     private final Label empty = new Label("Select a project, or add a task to this one.");
     private final BorderPane root = new BorderPane();
 
@@ -94,6 +97,9 @@ public final class TaskDetailController {
         sortChoice.getItems().addAll("Due date", "Priority");
         sortChoice.setValue("Due date");
         sortChoice.setOnAction(event -> refreshTable());
+        sortOrder.getItems().addAll("Ascending", "Descending");
+        sortOrder.setValue("Ascending");
+        sortOrder.setOnAction(event -> refreshTable());
 
         Button add = new Button("Add task");
         Button edit = new Button("Edit task");
@@ -105,7 +111,7 @@ public final class TaskDetailController {
         edit.setOnAction(event -> editTask(table.getSelectionModel().getSelectedItem()));
         delete.setOnAction(event -> deleteSelected());
 
-        HBox filters = new HBox(8, search, statusFilter, priorityFilter, memberFilter, sortChoice);
+        HBox filters = new HBox(8, search, statusFilter, priorityFilter, memberFilter, sortChoice, sortOrder);
         filters.getStyleClass().add("toolbar");
         HBox.setHgrow(search, Priority.ALWAYS);
         HBox actions = new HBox(8, add, edit, delete);
@@ -216,9 +222,17 @@ public final class TaskDetailController {
             tasks = workspace.taskService.filterByMember(tasks, memberId);
         }
         if ("Priority".equals(sortChoice.getValue())) {
+            // Highest priority first is the natural "descending" order for urgency.
             tasks = workspace.taskService.sortByPriority(tasks);
+            if ("Ascending".equals(sortOrder.getValue())) {
+                tasks = reverseCopy(tasks);
+            }
         } else {
+            // Earliest due date first is ascending.
             tasks = workspace.taskService.sortByDueDate(tasks);
+            if ("Descending".equals(sortOrder.getValue())) {
+                tasks = reverseCopy(tasks);
+            }
         }
         UUID selectedId = table.getSelectionModel().getSelectedItem() == null
                 ? null : table.getSelectionModel().getSelectedItem().getId();
@@ -292,6 +306,12 @@ public final class TaskDetailController {
             case IN_PROGRESS -> "In progress";
             case DONE -> "Done";
         };
+    }
+
+    private static List<Task> reverseCopy(List<Task> tasks) {
+        List<Task> copy = new ArrayList<>(tasks);
+        Collections.reverse(copy);
+        return copy;
     }
 
     private void deleteSelected() {
